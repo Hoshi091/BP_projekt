@@ -44,17 +44,20 @@ def extract_matching_sentences(soup, content_type, input_kw):
         text_elements = soup.find_all('body')
     #print(content_type)
     #print(soup)
-    
-    text = "".join(element.get_text()+"\n" for element in text_elements)
-    #text = re.sub(r'(?<!\.)\n', '. ', text)
-    #sentences = sent_tokenize(text)
-    #print(sentences)
+    text=""
+    for element in text_elements:
+        el_text = element.get_text()
+        if not el_text.endswith('.'):
+            el_text += '. ' 
+        text += el_text + " "
+    text = re.sub(r'(?<!\.)\n', '. ', text)
+    sentences = sent_tokenize(text)
+    print(sentences)
     pattern=[]
-    """for sentence in sentences:
+    for sentence in sentences:
         if input_kw.lower() in sentence.lower():
-            pattern.append(sentence)"""
-    print(text)
-    return text
+            pattern.append(sentence)
+    return pattern
 
 
 def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get_links):
@@ -73,6 +76,7 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
     options = Options()
     options.add_argument('--headless')  
     options.add_argument('--disable-gpu')
+    options.add_argument('--incognito')
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
     driver.get(url)
     driver.implicitly_wait(10)
@@ -83,6 +87,7 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
     soup = BeautifulSoup(page_source, 'html.parser')
     driver.quit()
     result=None
+
     if content_type != "main":
         if content_type == "a":
             result = extract_links(soup, get_full_links, get_links)
@@ -91,7 +96,6 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
             result = soup.find_all(content_type)
             return result
     elif input_keyword !="":
-            print("x")
             result = extract_matching_sentences(soup, content_type, input_keyword)
             return result
     else:

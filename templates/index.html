@@ -32,6 +32,10 @@
         <input type="text" id="keyword_input" name="keyword_input" value="">
         <label for="get_dynamic_content" id="get_dynamic_content_label">Page is dynamic</label>
         <input type="checkbox" id="get_dynamic_content" name="get_dynamic_content">
+       <!--  <label for="pagination_scrape" id="pagination_scrape_label">Scrape with pagination</label>
+        <input type="checkbox" id="pagination_scrape" name="pagination_scrape">
+        <label for="pagination_count">Enter number of pages to scrape</label>
+        <input type="number" id="pagination_count" name="pagination_count" >  -->
         
         <button type="submit">Scrape</button>
     </form>
@@ -91,6 +95,23 @@
                 searched_keyword_label.classList.remove('hidden');
             }
         }
+        /* document.addEventListener('DOMContentLoaded', function() {
+        var paginationCheckbox = document.getElementById('pagination_scrape');
+        var dynamicContent = document.getElementById('get_dynamic_content');
+        var countInput = document.getElementById('pagination_count');
+
+        paginationCheckbox.disabled = true;
+        countInput.disabled = true;
+
+        dynamicContent.addEventListener('change', function() {
+            paginationCheckbox.disabled = !this.checked;
+            countInput.disabled = !this.checked || !paginationCheckbox.checked;
+        });
+
+        paginationCheckbox.addEventListener('change', function() {
+            countInput.disabled = !this.checked || !dynamicContent.checked;
+        });
+    }); */
     </script>
 </body>
 </html>
