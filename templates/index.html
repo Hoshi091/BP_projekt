@@ -26,29 +26,44 @@
         </select>
         <label for="get_links" id="get_links_label" class="hidden">Get links instead of text</label>
         <input type="checkbox" id="get_links" name="get_links" class="hidden">
+
         <label for="get_full_links" id="get_full_links_label" class="hidden">Get only http/https links</label>
         <input type="checkbox" id="get_full_links" name="get_full_links" class="hidden">
+
         <label for="keyword_input" id="keyword_input_label">[Optional]Enter searched Keyword:</label>
         <input type="text" id="keyword_input" name="keyword_input" value="">
+
         <label for="get_dynamic_content" id="get_dynamic_content_label">Page is dynamic</label>
         <input type="checkbox" id="get_dynamic_content" name="get_dynamic_content">
-       <!--  <label for="pagination_scrape" id="pagination_scrape_label">Scrape with pagination</label>
+
+        <!-- <label for="pagination_scrape" id="pagination_scrape_label">Scrape with pagination</label>
         <input type="checkbox" id="pagination_scrape" name="pagination_scrape">
+
         <label for="pagination_count">Enter number of pages to scrape</label>
-        <input type="number" id="pagination_count" name="pagination_count" >  -->
+        <input type="number" id="pagination_count" name="pagination_count" >   -->
         
         <button type="submit">Scrape</button>
     </form>
 
-    {% if head %}
-        {% for element in head %}
-            {% if element is string %}
-                {{ element | safe }}
-            {% else %}
-                {{ element.get_text() | safe }}
-            {% endif %}
-        {% endfor %}
-    {% endif %}
+ {% if head %}
+    <br>
+    <form method="post" action="/save">
+        File Name:  <input type="text" name="file_name" required><br>
+        <input type="hidden" name="data" value="{{ head }}">
+        <button type="submit">Save to location</button>
+    </form>
+
+    
+    {{ head }}
+    <!-- {% for element in head %}
+        {% if element.name %}
+            {{ element.get_text() | safe }}
+        {% else %}
+            {{ element | safe }}
+        {% endif %}
+    {% endfor %} -->
+{% endif %}
+
 
 
     <script>
@@ -95,7 +110,7 @@
                 searched_keyword_label.classList.remove('hidden');
             }
         }
-        /* document.addEventListener('DOMContentLoaded', function() {
+    /*    document.addEventListener('DOMContentLoaded', function() {
         var paginationCheckbox = document.getElementById('pagination_scrape');
         var dynamicContent = document.getElementById('get_dynamic_content');
         var countInput = document.getElementById('pagination_count');
@@ -111,7 +126,7 @@
         paginationCheckbox.addEventListener('change', function() {
             countInput.disabled = !this.checked || !dynamicContent.checked;
         });
-    }); */
+    });*/
     </script>
 </body>
 </html>
