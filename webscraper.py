@@ -172,10 +172,10 @@ def index():
 
     plain_text=""
     if head:
-
         for element in head:
-            text = element.get_text()
-            plain_text += " " + text 
+            text = element.get_text().strip()
+            plain_text +=  text 
+        plain_text = re.sub(r'\s+', ' ', plain_text)
     return render_template('index.html', head=plain_text)
 
 @app.route('/save', methods=['GET', 'POST'])
