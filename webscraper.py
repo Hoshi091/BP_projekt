@@ -31,9 +31,10 @@ def extract_main_content(soup):
     if not main_content:
         main_content = soup.find_all('body')
     for tag in main_content:
-        paragraphs = tag.find_all(['p','span','td','th'])
-        for p in paragraphs:
-            p.insert_before(' ')
+        inline_content = tag.find_all(['p','span','td','th', 'a'])
+        for element in inline_content:
+            element.insert_before(' ')
+            element.insert_after(' ')
     return main_content
     
 
