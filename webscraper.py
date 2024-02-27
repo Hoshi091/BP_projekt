@@ -31,7 +31,7 @@ def extract_main_content(soup):
     if not main_content:
         main_content = soup.find_all('body')
     for tag in main_content:
-        inline_content = tag.find_all(['p','span','td','th', 'a'])
+        inline_content = tag.find_all(['p', 'span', 'td', 'th', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
         for element in inline_content:
             element.insert_before(' ')
             element.insert_after(' ')
@@ -92,17 +92,42 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
 
     WebDriverWait(driver, 10).until(expected_conditions.presence_of_all_elements_located)
 
+    
+    #driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    #time.sleep(2)
 
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    time.sleep(2)
+    #pagination - popup dismissnúť v každom cykle ak sa nájde
+    page_source=""
+    pagination_usage = request.form.get('pagination_scrape', default=False, type=bool)
+    
+    if pagination_usage:
+        pagination_count = 0
+        pagination_count = int(request.form['pagination_count'])
+        if pagination_count>0:
+            pagination_texts = ['Next', 'next', 'Next Page', 'Next page', '>','›', 'Continue', 'Next >', 'Forward', 'More', 'Proceed', 'Next »']
+            for _ in range(pagination_count-1):
+                page_source += driver.page_source
+                next_button = None
+                for text in pagination_texts:
+                    try:
+                        next_button = driver.find_element(By.XPATH, f"//a[contains(text(), '{text}')]")
+                        break
+                    except Exception:
+                        pass
+                    
+                if next_button:
+                    next_button.click()
+                    time.sleep(2)  
+                    url = driver.current_url
+                    print("Navigated to:", url)
+                    driver.get(url)
+                else:
+                    break
+    
+    page_source += driver.page_source
+    
 
-     #pagination
-    """ pagination_count = 0
-    pagination_count = request.form['pagination_count']
-    pagination_format = ['page/{}', '?page={}']
-    pagination_urls = [] """
 
-    page_source = driver.page_source
     page_source = re.sub(r'<br\s*/?>|\n', ' ', page_source)
     page_source = re.sub(r'\.(?![\"”\)\]])', '. ', page_source) 
     page_source = re.sub(r'\?(?![\"”\)\]])', '? ', page_source) 
