@@ -100,13 +100,14 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
     dismiss_popups(driver)
     page_source=""
     pagination_usage = request.form.get('pagination_scrape', default=False, type=bool)
-    
     if pagination_usage:
         pagination_count = 0
         pagination_count = int(request.form['pagination_count'])
+        previous_url = driver.current_url
         if pagination_count>0:
             pagination_texts = ['Next', 'next', 'Next Page', 'Next page', '>','›', 'Continue', 'Next >', 'Forward', 'More', 'Proceed', 'Next »']
-            for _ in range(pagination_count-1):
+            for _ in range(pagination_count):
+                
                 page_source += driver.page_source
                 next_button = None
                 for text in pagination_texts:
@@ -115,19 +116,24 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
                         break
                     except Exception:
                         pass
+                
                         
                 if next_button:
+                    previous_url = driver.current_url
                     dismiss_popups(driver)
                     driver.execute_script("arguments[0].click();", next_button)
                     time.sleep(2)  
                     url = driver.current_url
-                    print("Navigated to:", url)
+                    #print("Navigated to:", url)
                     driver.get(url)
+                    #print(previous_url, url)
+                    if url == previous_url:
+                        break
                 else:
+                    print("Next button not found")
                     break
-            
-    
-    page_source += driver.page_source
+    else:
+        page_source += driver.page_source
     
 
     page_source = re.sub(r'<br\s*/?>|\n', ' ', page_source)
