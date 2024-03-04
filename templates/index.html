@@ -4,65 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Scraper App</title>
-    <style>
-        .hidden {
-            display: none;
-        }
-    </style>
-</head>
-<body>
-    <form method="post">
-        <label for="url">Enter URL:</label>
-        <input type="text" id="url" name="url" required>
-        <select id="content_type" name="content_type">
-            <option value="main">Text</option>
-            <option value="p">p</option>
-            <option value="h1">H1</option>
-            <option value="h2">H2</option>
-            <option value="h3">H3</option>
-            <option value="b">Bold</option> 
-            <option value="i">Italics</option>
-            <option value="a">Links</option>
-        </select>
-        <label for="get_links" id="get_links_label" class="hidden">Get links instead of text</label>
-        <input type="checkbox" id="get_links" name="get_links" class="hidden">
-
-        <label for="get_full_links" id="get_full_links_label" class="hidden">Get only http/https links</label>
-        <input type="checkbox" id="get_full_links" name="get_full_links" class="hidden">
-
-        <label for="keyword_input" id="keyword_input_label">[Optional]Enter searched Keyword:</label>
-        <input type="text" id="keyword_input" name="keyword_input" value="">
-
-        <label for="get_dynamic_content" id="get_dynamic_content_label">Page is dynamic</label>
-        <input type="checkbox" id="get_dynamic_content" name="get_dynamic_content">
-
-         <label for="pagination_scrape" id="pagination_scrape_label">Scrape with pagination</label>
-        <input type="checkbox" id="pagination_scrape" name="pagination_scrape">
-
-        <label for="pagination_count">Enter number of pages to scrape</label>
-        <input type="number" id="pagination_count" name="pagination_count" value="0"> 
-        
-        <button type="submit">Scrape</button>
-    </form>
-
- {% if head %}
-    <br>
-    <form method="post" action="/save">
-        File Name:  <input type="text" name="file_name" required><br>
-        <input type="hidden" name="data" value="{{ head }}">
-        <button type="submit">Save to location</button>
-    </form>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
 
     
-    {{ head }}
-    <!-- {% for element in head %}
-        {% if element.name %}
-            {{ element.get_text() | safe }}
-        {% else %}
-            {{ element | safe }}
+</head>
+<body>
+    <div class="form-container">
+        <form method="post" >
+            <label for="url">Enter URL:</label>
+            <input type="text" id="url" name="url" required>
+            <select id="content_type" name="content_type">
+                <option value="main">Full text</option>
+                <option value="p">Text in p tags</option>
+                <option value="div">Text in div tags</option>
+                <option value="span">Text in span tags</option>
+                <option value="ul">Text in ul tags</option>
+                <option value="ol">Text in ol tags</option>
+                <option value="li">Text in li tags</option>
+                <option value="h1">H1</option>
+                <option value="h2">H2</option>
+                <option value="h3">H3</option>
+                <option value="h4">H4</option>
+                <option value="h5">H5</option>
+                <option value="b">Bold</option> 
+                <option value="i">Italics</option>
+                <option value="a">Links</option>
+            </select>
+            <br>
+            <div class="checkbox-label">
+                <label for="get_links" id="get_links_label" class="hidden">Get links instead of text</label>
+                <input type="checkbox" id="get_links" name="get_links" class="hidden">
+            </div>
+
+            <div class="checkbox-label">
+                <label for="get_full_links" id="get_full_links_label" class="hidden">Get only http/https links</label>
+                <input type="checkbox" id="get_full_links" name="get_full_links" class="hidden">
+            </div>
+
+            <br>
+            <label for="keyword_input" id="keyword_input_label">[Optional]Enter searched Keyword:</label>
+            <input type="text" id="keyword_input" name="keyword_input" value="">
+            <br>
+            <div class="checkbox-label">
+                <label for="get_dynamic_content" id="get_dynamic_content_label">Page is dynamic</label>
+                <input type="checkbox" id="get_dynamic_content" name="get_dynamic_content">
+            </div>
+            <div class="checkbox-label">
+                <label for="pagination_scrape" id="pagination_scrape_label">Scrape with pagination</label>
+                <input type="checkbox" id="pagination_scrape" name="pagination_scrape">
+            </div>
+            <label for="pagination_count">Enter number of pages to scrape</label>
+            <input type="number" id="pagination_count" name="pagination_count" value="0"> 
+            <br>
+            <button type="submit">Scrape</button>
+        </form>
+    </div>
+    <div class="output-container">
+        {% if head %}
+            <br>
+            
+            <div class="output-form-container">
+                <h2>Save to file:</h2>
+                <form method="post" action="/save">
+                    File Name:  <input type="text" name="file_name" required>
+                    <input type="hidden" name="data" value="{{ head }}">
+                    <button type="submit">Save to location</button>
+                </form>
+            </div>
+        
+            <h2>Output:</h2>
+            <div class="output-text-container">
+                {{ head }}
+            </div>
         {% endif %}
-    {% endfor %} -->
-{% endif %}
+    </div>
 
 
 

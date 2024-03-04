@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Save Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
 </head>
 <body>
-    <h1>{{ message }}</h1>
-    <a href="/">Scrape again</a>
+    <div class="save-container">
+        <h1>{{ message }}</h1>
+        <hr>
+        <button type="button" onclick="window.location.href='/';">Scrape again</button>
+    </div>
 </body>
 </html>

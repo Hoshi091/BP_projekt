@@ -14,6 +14,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service 
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager 
+from selenium.common.exceptions import TimeoutException
 
 import time
 import os
@@ -63,9 +64,12 @@ def extract_matching_sentences(soup, content_type, input_kw):
     #print(soup)
     text=""
     for element in text_elements:
+        inline_content = element.find_all(['p', 'span', 'td', 'th', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+        for el in inline_content:
+            el.insert_after('. ')
         el_text = element.get_text()
         if not el_text.endswith('.'):
-            el_text += '.' 
+            el_text += '. ' 
         text += el_text + " "
     text = re.sub(r'(?<!\.)\n', '. ', text)
     sentences = sent_tokenize(text)
@@ -84,19 +88,16 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
     options.add_argument('--disable-popup-blocking')
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     driver.get(url)
-    try:
-        accept_button = driver.find_element(By.XPATH, '//button[contains(text(), "Accept") or contains(text(), "Accept All")]')
-        accept_button.click()
-    except:
-        pass
+    
 
-    WebDriverWait(driver, 10).until(expected_conditions.presence_of_all_elements_located)
+    try:
+        WebDriverWait(driver, 10).until(expected_conditions.presence_of_all_elements_located)
+    except TimeoutException:
+        print("Timed out on the page load")
+        return None
 
     
-    #driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    #time.sleep(2)
-
-    #pagination - popup dismissnúť v každom cykle ak sa nájde
+    dismiss_popups(driver)
     page_source=""
     pagination_usage = request.form.get('pagination_scrape', default=False, type=bool)
     
@@ -114,27 +115,27 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
                         break
                     except Exception:
                         pass
-                    
+                        
                 if next_button:
-                    next_button.click()
+                    dismiss_popups(driver)
+                    driver.execute_script("arguments[0].click();", next_button)
                     time.sleep(2)  
                     url = driver.current_url
                     print("Navigated to:", url)
                     driver.get(url)
                 else:
                     break
+            
     
     page_source += driver.page_source
     
-
 
     page_source = re.sub(r'<br\s*/?>|\n', ' ', page_source)
     page_source = re.sub(r'\.(?![\"”\)\]])', '. ', page_source) 
     page_source = re.sub(r'\?(?![\"”\)\]])', '? ', page_source) 
     page_source = re.sub(r'\!(?![\"”\)\]])', '! ', page_source) 
-    
-    soup = BeautifulSoup(page_source, 'html.parser')
     driver.quit()
+    soup = BeautifulSoup(page_source, 'html.parser')
     result=None
 
     if content_type != "main":
@@ -151,6 +152,12 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
         result = extract_main_content(soup)
         return soup
 
+def dismiss_popups(driver):
+    try:
+        accept_button = driver.find_element(By.XPATH, '//button[contains(text(), "Accept") or contains(text(), "Accept All") or contains(text(), "Accept cookies") or contains(text(), "Accept & Continue") or contains(text(), "Continue")]')
+        accept_button.click()
+    except:
+        pass
 
 def save_to_file(data, file_name):
     parsed_data = BeautifulSoup(data, 'html.parser')
@@ -193,14 +200,14 @@ def index():
         else:
             head = soup.find_all(content_type)
 
-           
-
-
     plain_text=""
     if head:
         for element in head:
-            text = element.get_text().strip()
-            plain_text +=  text 
+            if isinstance(element, str): 
+                text = element.strip()
+            else:
+                text = element.get_text().strip()
+            plain_text +=  text +' '
         plain_text = re.sub(r'\s+', ' ', plain_text)
     return render_template('index.html', head=plain_text)
 

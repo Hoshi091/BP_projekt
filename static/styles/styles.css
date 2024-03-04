@@ -1,0 +1,137 @@
+:root {
+    --primary-color: #2E7679;
+    --secondary-color: #1F6366;
+    --tertiary-color: #45A2A7;
+    --background-color: #E9FDFF;
+    --black: #000000;
+    --white: #FFFFFF;
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--black);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+}
+
+/*.output-container, .form-container{
+
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    
+}*/
+
+.hidden {
+    display: none;
+}
+
+.form-container, .output-form-container {
+    width: 25%;
+    max-width: 100%;
+    min-width: 25%;
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 2em auto;
+}
+
+
+.form-container #url, .form-container #content_type {
+    width: 50%;
+    display: block;
+    
+}
+
+.form-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-container label {
+    margin-bottom: 5px;
+}
+
+.form-container input[type="text"], .output-form-container input[type="text"],
+.form-container input[type="number"], .output-form-container input[type="number"],
+.form-container select, .output-form-container select{
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.form-container input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: var(--primary-color) 0.3s;
+}
+
+button:hover {
+    background-color: var(--tertiary-color);
+}
+.checkbox-label {
+    display: flex;
+    justify-content: space-between;
+}
+
+
+input[type="checkbox"] {
+    width: 1em;
+    height: 1rem;
+    accent-color: var(--primary-color);
+  }
+  
+.output-text-container {
+    background-color: var(--white);
+}
+
+.output-text-container {
+    width: 95%;
+    margin: auto;
+    padding: 20px;
+    border-radius: 8px;
+    line-height: 1.5;
+}
+
+.output-container h2 {
+    margin-left: 2em;
+    color: var(--secondary-color);
+}
+.output-form-container h2 {
+    margin-left: 0;
+}
+.save-container {
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: 8px;
+    margin: 2em auto;
+}
+
+.save-container h1 {
+    color: var(--primary-color);
+}
+
+.save-container hr {
+    color: var(--secondary-color);
+}
