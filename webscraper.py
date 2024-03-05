@@ -131,7 +131,14 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
                         break
                 else:
                     print("Next button not found")
+                    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                    time.sleep(2)
+                    page_source += driver.page_source
+                    if driver.execute_script("return window.innerHeight + window.pageYOffset") >= driver.execute_script("return document.body.scrollHeight"):
+                        print("Reached end of page")
+                        break
                     break
+
     else:
         page_source += driver.page_source
     
