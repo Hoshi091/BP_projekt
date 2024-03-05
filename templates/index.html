@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Scraper App</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
 
-    
+
 </head>
+
 <body>
     <div class="form-container">
-        <form method="post" >
+        <form method="post">
             <label for="url">Enter URL:</label>
             <input type="text" id="url" name="url" required>
             <select id="content_type" name="content_type">
@@ -26,7 +28,7 @@
                 <option value="h3">H3</option>
                 <option value="h4">H4</option>
                 <option value="h5">H5</option>
-                <option value="b">Bold</option> 
+                <option value="b">Bold</option>
                 <option value="i">Italics</option>
                 <option value="a">Links</option>
             </select>
@@ -54,99 +56,37 @@
                 <input type="checkbox" id="pagination_scrape" name="pagination_scrape">
             </div>
             <label for="pagination_count">Enter number of pages to scrape</label>
-            <input type="number" id="pagination_count" name="pagination_count" value="1" min="1"> 
+            <input type="number" id="pagination_count" name="pagination_count" value="1" min="1">
             <br>
             <button type="submit">Scrape</button>
         </form>
     </div>
     <div class="output-container">
         {% if head %}
-            <br>
-            
-            <div class="output-form-container">
-                <h2>Save to file:</h2>
-                <form method="post" action="/save">
-                    File Name:  <input type="text" name="file_name" required>
-                    <input type="hidden" name="data" value="{{ head }}">
-                    <button type="submit">Save to location</button>
-                </form>
-            </div>
-        
-            <h2>Output:</h2>
-            <div class="output-text-container">
-                {{ head }}
-            </div>
+        <br>
+
+        <div class="output-form-container">
+            <h2>Save to file:</h2>
+            <form method="post" action="/save">
+                File Name: <input type="text" name="file_name" required>
+                <input type="hidden" name="data" value="{{ head }}">
+                <button type="submit">Save to location</button>
+            </form>
+        </div>
+
+        <h2>Output:</h2>
+        <div class="output-text-container">
+            {{ head }}
+        </div>
         {% endif %}
+    </div>
+    <div class="loader_overlay" id="loader_overlay">
+        <div class="loader" id="loader"></div>
     </div>
 
 
 
-    <script>
-        document.getElementById('content_type').onchange = function() {
-            checkVisibility();
-        }
-
-        document.getElementById('get_links').onchange = function() {
-            checkVisibility();
-        }
-        function checkVisibility(){
-            var selected_option = document.getElementById('content_type');
-            var get_links = document.getElementById('get_links');
-            var get_links_label = document.getElementById('get_links_label');
-            var get_full_links =document.getElementById('get_full_links');
-            var get_full_links_label =document.getElementById('get_full_links_label');
-            var searched_keyword = document.getElementById('keyword_input');
-            var searched_keyword_label = document.getElementById('keyword_input_label');
-
-            if (selected_option.value == 'a'){
-                get_links.classList.remove('hidden');
-                get_links_label.classList.remove('hidden');
-                if (get_links.checked) {
-                    get_full_links.classList.remove('hidden');
-                    get_full_links_label.classList.remove('hidden');
-                } else {
-                    get_full_links.classList.add('hidden');
-                    get_full_links_label.classList.add('hidden');
-                }
-
-            }
-            else{
-                get_links.classList.add('hidden');
-                get_links_label.classList.add('hidden');
-                get_full_links.classList.add('hidden');
-                get_full_links_label.classList.add('hidden');
-            }
-            if (selected_option.value != 'main'){
-                searched_keyword.classList.add('hidden');
-                searched_keyword_label.classList.add('hidden');
-                searched_keyword.value="";
-            } else {
-                searched_keyword.classList.remove('hidden');
-                searched_keyword_label.classList.remove('hidden');
-            }
-        }
-        document.addEventListener('DOMContentLoaded', function() {
-    var paginationCheckbox = document.getElementById('pagination_scrape');
-    var dynamicContent = document.getElementById('get_dynamic_content');
-    var countInput = document.getElementById('pagination_count');
-
-    paginationCheckbox.disabled = true;
-    countInput.disabled = true;
-
-    dynamicContent.addEventListener('change', function() {
-        paginationCheckbox.disabled = !this.checked;
-        countInput.disabled = !this.checked || !paginationCheckbox.checked;
-        if (this.checked) {
-            paginationCheckbox.checked = false;  
-        }
-    });
-
-    paginationCheckbox.addEventListener('change', function() {
-        countInput.disabled = !this.checked || !dynamicContent.checked;
-    });
-});
-    </script>
+    <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
 </body>
+
 </html>
-
-
