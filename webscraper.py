@@ -6,6 +6,9 @@ import re
 
 import nltk
 from nltk.tokenize import sent_tokenize
+from nltk.corpus import stopwords
+
+import stanza
 
 from selenium import webdriver 
 from selenium.webdriver.support.ui import WebDriverWait
@@ -14,7 +17,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service 
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager 
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 import time
 import os
@@ -26,6 +29,7 @@ app = Flask(__name__)
 
 app.secret_key = os.urandom(24)
 nltk.download('punkt')
+nltk.download('stopwords')
 
 def extract_main_content(soup):
     main_content = soup.find_all('main')
@@ -34,7 +38,7 @@ def extract_main_content(soup):
     for tag in main_content:
         inline_content = tag.find_all(['p', 'span', 'td', 'th', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
         for element in inline_content:
-            element.insert_before(' ')
+            #element.insert_before(' ')
             element.insert_after(' ')
     return main_content
     
@@ -105,7 +109,7 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
         pagination_count = int(request.form['pagination_count'])
         previous_url = driver.current_url
         if pagination_count>0:
-            pagination_texts = ['Next', 'next', 'Next Page', 'Next page', '>','›', 'Continue', 'Next >', 'Forward', 'More', 'Proceed', 'Next »']
+            pagination_texts = ['Next', 'next', 'Next Page', 'Next page', '>','›', 'Continue', 'Next >', 'Forward', 'More', 'Proceed', 'Next »', 'Ďalej', 'Ďalšie', 'Ďalšie >', 'Ďalšia', 'Ďalšia >' 'Pokračovať']
             for _ in range(pagination_count):
                 
                 page_source += driver.page_source
@@ -113,10 +117,15 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
                 for text in pagination_texts:
                     try:
                         next_button = driver.find_element(By.XPATH, f"//a[contains(text(), '{text}')]")
+
                         break
                     except Exception:
                         pass
-                
+                if not next_button:
+                    try:
+                        next_button = driver.find_element(By.CSS_SELECTOR, 'link[rel="next"]')
+                    except NoSuchElementException:
+                        pass
                         
                 if next_button:
                     previous_url = driver.current_url
@@ -164,13 +173,39 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
     else:
         result = extract_main_content(soup)
         return soup
+    
+    
 
 def dismiss_popups(driver):
     try:
-        accept_button = driver.find_element(By.XPATH, '//button[contains(text(), "Accept") or contains(text(), "Accept All") or contains(text(), "Accept cookies") or contains(text(), "Accept & Continue") or contains(text(), "Continue")]')
+        accept_button = driver.find_element(By.XPATH, '//button[contains(text(), "Accept") or contains(text(), "Accept All") or contains(text(), "Accept cookies") or contains(text(), "Accept & Continue") or contains(text(), "Continue") or contains(text(), "Povoliť") or contains(text(), "Povoliť všetko") or contains(text(), "Súhlasím")]')
+        driver.execute_script("arguments[0].scrollIntoView();", accept_button)
         accept_button.click()
+        print("Popup dismissed successfully.")
+    except NoSuchElementException:
+        print("Accept button not found.")
+    except Exception as e:
+        print("Error occurred while dismissing popup:", e)
     except:
         pass
+
+#Porieš aby to bralo aj SK slová 
+
+def remove_stopwords(main_text, stop_words):
+    english_stopwords = stop_words.words('english')
+   # slovak_stopwords = stopwords.words('slovak_stopwords.txt')
+    #combined_stopwords = set(english_stopwords) | set(slovak_stopwords)
+    print (main_text)
+    return [' '.join([word for word in string.split() if word not in english_stopwords]) for string in main_text] 
+
+def lemmas(main_text):
+    nlp = stanza.Pipeline(lang='sk', processors='tokenize,mwt,pos,lemma')
+    doc = nlp(main_text)
+    lemmas = [word.lemma for sent in doc.sentences for word in sent.words]
+    return lemmas 
+
+def remove_numbers(main_text):
+    return re.sub(r'[\(\[\{]\d+–?\d*[\)\]\}]|\d', '', main_text)
 
 def save_to_file(data, file_name):
     parsed_data = BeautifulSoup(data, 'html.parser')
@@ -178,8 +213,12 @@ def save_to_file(data, file_name):
     final_data = re.sub(r'\s+', ' ', final_data)
     final_data = final_data.lstrip('[').rstrip(']')
     final_data = final_data.strip()
+
+    output_path = os.path.join(os.getcwd(), "output")
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
     
-    file_path = f"{file_name}.txt"
+    file_path = os.path.join(output_path, f"{file_name}.txt")
     try:
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(final_data)
@@ -201,6 +240,11 @@ def index():
         get_links = request.form.get('get_links', default=False, type=bool)
         get_full_links = request.form.get('get_full_links', default=False, type=bool)
         dynamic_content = request.form.get('get_dynamic_content', default=False, type=bool)
+        clean_stopwords = request.form.get('clean_stopwords', default=False, type=bool)
+        get_lemmas = request.form.get('get_lemmas', default=False, type=bool)
+        clean_numbers = request.form.get('delete_numbers', default=False, type=bool) 
+
+
         soup = BeautifulSoup(source, 'lxml')
         if dynamic_content:
             head = extract_dynamic_content(url, content_type, input_keyword, get_full_links,get_links)
@@ -213,6 +257,8 @@ def index():
         else:
             head = soup.find_all(content_type)
 
+        
+
     plain_text=""
     if head:
         for element in head:
@@ -221,7 +267,18 @@ def index():
             else:
                 text = element.get_text().strip()
             plain_text +=  text +' '
+        plain_text = re.sub(r'\s*([,.?!;:])\s*', r'\1 ', plain_text)
         plain_text = re.sub(r'\s+', ' ', plain_text)
+
+        if clean_stopwords:
+            plain_text = remove_stopwords([plain_text], stopwords)
+        if get_lemmas:
+            plain_text = lemmas(plain_text)
+            pass
+        if clean_numbers:
+            plain_text = remove_numbers(plain_text)
+            pass 
+
     return render_template('index.html', head=plain_text)
 
 @app.route('/save', methods=['GET', 'POST'])
