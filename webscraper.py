@@ -107,27 +107,30 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
     if pagination_usage:
         pagination_count = 0
         pagination_count = int(request.form['pagination_count'])
-        previous_url = driver.current_url
+        original_url = driver.current_url
         if pagination_count>0:
-            pagination_texts = ['Next', 'next', 'Next Page', 'Next page', '>','›', 'Continue', 'Next >', 'Forward', 'More', 'Proceed', 'Next »', 'Ďalej', 'Ďalšie', 'Ďalšie >', 'Ďalšia', 'Ďalšia >' 'Pokračovať']
-            for _ in range(pagination_count):
+            pagination_texts = ['Next', 'next', 'Next Page', 'Next page', '>','›', 'Continue', 'Next >', 'Forward', 'More', 'Proceed', 'Next »', 'Ďalej', 'Ďalej>', 'Ďalšie', 'Ďalšie >', 'Ďalšia', 'Ďalšia strana', 'Ďalšia >', 'Ďalšia strana >', 'Pokračovať', 'Pokračovať >', 'Nasledujúca stránka']
+            for i in range(1,pagination_count+1):
                 
                 page_source += driver.page_source
                 next_button = None
                 for text in pagination_texts:
                     try:
                         next_button = driver.find_element(By.XPATH, f"//a[contains(text(), '{text}')]")
-
-                        break
-                    except Exception:
+                        break  # Exit the loop if the button is found
+                    except NoSuchElementException:
                         pass
-                if not next_button:
+
+                """if not next_button:  # If no button found, try finding it as a link element
                     try:
                         next_button = driver.find_element(By.CSS_SELECTOR, 'link[rel="next"]')
                     except NoSuchElementException:
-                        pass
+                        next_button = None
+                        pass"""
+                
                         
                 if next_button:
+                    print("Next button found")
                     previous_url = driver.current_url
                     dismiss_popups(driver)
                     driver.execute_script("arguments[0].click();", next_button)
@@ -140,13 +143,22 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
                         break
                 else:
                     print("Next button not found")
-                    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                    time.sleep(2)
-                    page_source += driver.page_source
-                    if driver.execute_script("return window.innerHeight + window.pageYOffset") >= driver.execute_script("return document.body.scrollHeight"):
-                        print("Reached end of page")
+                    next_page_url = construct_next_page_url(original_url, i+1)  
+                    print(next_page_url)
+                    response = requests.get(next_page_url)
+                    if response.status_code == 200:
+                        # Navigate to the next page
+                        driver.get(next_page_url)
+                        time.sleep(2)
+                        #page_source += driver.page_source
+                    else:
+                        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                        time.sleep(2)
+                        #page_source += driver.page_source
+                        if driver.execute_script("return window.innerHeight + window.pageYOffset") >= driver.execute_script("return document.body.scrollHeight"):
+                            print("Reached end of page")
+                            break
                         break
-                    break
 
     else:
         page_source += driver.page_source
@@ -174,37 +186,82 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
         result = extract_main_content(soup)
         return soup
     
+def construct_next_page_url(base_url, page_number):
+    query_param_url = f"{base_url}?page={page_number}"
     
+    response = requests.get(query_param_url)
+    print(response)
+    if response.status_code != 404:
+        return query_param_url
+    
+    patterns = [
+        f"{base_url.rstrip('/')}/page/{page_number}",
+        f"{base_url}&page={page_number}",
+        f"{base_url}?page_num={page_number}",
+        f"{base_url}?strana={page_number}"
+    ]
+    
+    for pattern in patterns:
+        response = requests.get(pattern)
+        print(pattern)
+        print(response)
+        if response.status_code == 200:
+            return pattern
+
+    return patterns[-1]
+
 
 def dismiss_popups(driver):
     try:
-        accept_button = driver.find_element(By.XPATH, '//button[contains(text(), "Accept") or contains(text(), "Accept All") or contains(text(), "Accept cookies") or contains(text(), "Accept & Continue") or contains(text(), "Continue") or contains(text(), "Povoliť") or contains(text(), "Povoliť všetko") or contains(text(), "Súhlasím")]')
+        accept_button = driver.find_element(By.XPATH, '//button[contains(text(), "Accept") or contains(text(), "Accept All") or contains(text(), "Accept cookies") or contains(text(), "Accept & Continue") or contains(text(), "Continue") or contains(text(), "Povoliť") or contains(text(), "Povoliť všetko") or contains(text(), "Súhlasím") or contains(text(), "Súhlasím s používaním súborov cookies") or contains(text(), "Prijať všetky súbory cookies") or contains(text(), "Súhlasím so všetkými cookies") or contains(text(), "Potvrdiť")]')
         driver.execute_script("arguments[0].scrollIntoView();", accept_button)
         accept_button.click()
         print("Popup dismissed successfully.")
     except NoSuchElementException:
-        print("Accept button not found.")
+        try:
+            accept_button = driver.find_element(By.XPATH, '//a[contains(text(), "Accept") or contains(text(), "Accept All") or contains(text(), "Accept cookies") or contains(text(), "Accept & Continue") or contains(text(), "Continue") or contains(text(), "Povoliť") or contains(text(), "Povoliť všetko") or contains(text(), "Súhlasím") or contains(text(), "Súhlasím s používaním súborov cookies") or contains(text(), "Prijať všetky súbory cookies") or contains(text(), "Súhlasím so všetkými cookies") or contains(text(), "Potvrdiť")]')
+            driver.execute_script("arguments[0].scrollIntoView();", accept_button)
+            accept_button.click()
+            print("Popup dismissed successfully.")
+        except NoSuchElementException:
+            print("Accept button not found.")
     except Exception as e:
         print("Error occurred while dismissing popup:", e)
     except:
         pass
 
-#Porieš aby to bralo aj SK slová 
+#Porieš aby to bralo aj SK slová, zisti prečo nefunguje popup dismiss na martinuse
+def load_from_file(path):
+    with open(path, 'r', encoding='utf-8') as file:
+        loaded_content = [line.strip() for line in file]
+    
+    return loaded_content
 
-def remove_stopwords(main_text, stop_words):
-    english_stopwords = stop_words.words('english')
-   # slovak_stopwords = stopwords.words('slovak_stopwords.txt')
+
+def remove_stopwords(main_text, stop_words, language_choice):
+    if language_choice == 'sk':
+        picked_stopwords = load_from_file('stopwords-sk.txt')
+    else:
+        picked_stopwords = stop_words.words('english')
+    
     #combined_stopwords = set(english_stopwords) | set(slovak_stopwords)
-    print (main_text)
-    return [' '.join([word for word in string.split() if word not in english_stopwords]) for string in main_text] 
+    print(picked_stopwords)
+    #print (main_text)
+    filtered_texts=  [' '.join([word for word in string.split() if word.lower() not in picked_stopwords]) for string in main_text] 
+    return ' '.join(filtered_texts)
 
-def lemmas(main_text):
-    nlp = stanza.Pipeline(lang='sk', processors='tokenize,mwt,pos,lemma')
+def lemmas(main_text, language_choice):
+    if language_choice == 'sk':
+        nlp = stanza.Pipeline(lang='sk', processors='tokenize,mwt,pos,lemma')
+    else:
+        nlp = stanza.Pipeline(lang='en', processors='tokenize,mwt,pos,lemma')
     doc = nlp(main_text)
     lemmas = [word.lemma for sent in doc.sentences for word in sent.words]
     return lemmas 
 
 def remove_numbers(main_text):
+    if isinstance(main_text, list):
+        main_text = ' '.join(main_text)
     return re.sub(r'[\(\[\{]\d+–?\d*[\)\]\}]|\d', '', main_text)
 
 def save_to_file(data, file_name):
@@ -240,6 +297,7 @@ def index():
         get_links = request.form.get('get_links', default=False, type=bool)
         get_full_links = request.form.get('get_full_links', default=False, type=bool)
         dynamic_content = request.form.get('get_dynamic_content', default=False, type=bool)
+        language_choice = request.form['language_picker']
         clean_stopwords = request.form.get('clean_stopwords', default=False, type=bool)
         get_lemmas = request.form.get('get_lemmas', default=False, type=bool)
         clean_numbers = request.form.get('delete_numbers', default=False, type=bool) 
@@ -271,9 +329,9 @@ def index():
         plain_text = re.sub(r'\s+', ' ', plain_text)
 
         if clean_stopwords:
-            plain_text = remove_stopwords([plain_text], stopwords)
+            plain_text = remove_stopwords([plain_text], stopwords, language_choice)
         if get_lemmas:
-            plain_text = lemmas(plain_text)
+            plain_text = lemmas(plain_text, language_choice)
             pass
         if clean_numbers:
             plain_text = remove_numbers(plain_text)
