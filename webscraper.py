@@ -230,7 +230,6 @@ def dismiss_popups(driver):
     except:
         pass
 
-#Porieš aby to bralo aj SK slová, zisti prečo nefunguje popup dismiss na martinuse
 def load_from_file(path):
     with open(path, 'r', encoding='utf-8') as file:
         loaded_content = [line.strip() for line in file]
@@ -244,7 +243,6 @@ def remove_stopwords(main_text, stop_words, language_choice):
     else:
         picked_stopwords = stop_words.words('english')
     
-    #combined_stopwords = set(english_stopwords) | set(slovak_stopwords)
     print(picked_stopwords)
     #print (main_text)
     filtered_texts=  [' '.join([word for word in string.split() if word.lower() not in picked_stopwords]) for string in main_text] 
@@ -288,6 +286,7 @@ def save_to_file(data, file_name):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     head = None
+    language_choice = ""
 
     if request.method == 'POST':
         url = request.form['url']
@@ -337,18 +336,25 @@ def index():
             plain_text = remove_numbers(plain_text)
             pass 
 
-    return render_template('index.html', head=plain_text)
+    return render_template('index.html', head=plain_text, language=language_choice)
 
 @app.route('/save', methods=['GET', 'POST'])
 def save():
     data = request.form['data']
     file_name = request.form['file_name']
+    language = request.form['language']
     saved = save_to_file(data, file_name) 
 
-    if saved:
-        message = "Saved successfully"
+    if language == 'sk':
+        if saved:
+            message = "Úspešne uložené"
+        else:
+            message = "Nepodarilo sa uložiť"
     else:
-        message = "Failed to save"
+        if saved:
+            message = "Saved successfully"
+        else:
+            message = "Failed to save"
 
 
     return render_template('save.html', message=message, saved=saved)
