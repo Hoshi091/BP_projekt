@@ -26,7 +26,7 @@
                 </select>
             </div>
             <label for="url" id="url_label">Enter URL:</label>
-            <input type="text" id="url" name="url" required>
+            <input type="text" id="url" name="url" required value="{{ request.form['url'] if request.method == 'POST' else '' }}">
             <select id="content_type" name="content_type">
                 <option value="main">Full text</option>
                 <option value="p">Text in p tags</option>
