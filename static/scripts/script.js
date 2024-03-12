@@ -1,7 +1,7 @@
 
 var labelTexts = {
     'en': {
-        'language_picker_label': 'Select language:',
+        'language_picker_label': 'Select the language of your page and app:',
         'url_label': 'Enter URL:',
         'get_links_label': 'Get links instead of text',
         'get_full_links_label': 'Get only http/https links',
@@ -16,7 +16,7 @@ var labelTexts = {
         'file_name_label': 'File name:'
     },
     'sk': {
-        'language_picker_label': 'Vyberte si jazyk:',
+        'language_picker_label': 'Vyberte si jazyk aplikácie a webovej stránky:',
         'url_label': 'Zadajte URL:',
         'get_links_label': 'Získať odkazy namiesto textu',
         'get_full_links_label': 'Získať iba odkazy s http/https',

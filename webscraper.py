@@ -89,7 +89,6 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
     options.add_argument('--headless')  
     options.add_argument('--disable-gpu')
     options.add_argument('--incognito')
-    options.add_argument('--disable-popup-blocking')
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     driver.get(url)
     
