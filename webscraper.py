@@ -116,7 +116,7 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
                 for text in pagination_texts:
                     try:
                         next_button = driver.find_element(By.XPATH, f"//a[contains(text(), '{text}')]")
-                        break  # Exit the loop if the button is found
+                        break 
                     except NoSuchElementException:
                         pass
 
@@ -135,9 +135,7 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
                     driver.execute_script("arguments[0].click();", next_button)
                     time.sleep(2)  
                     url = driver.current_url
-                    #print("Navigated to:", url)
                     driver.get(url)
-                    #print(previous_url, url)
                     if url == previous_url:
                         break
                 else:
@@ -146,14 +144,11 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
                     print(next_page_url)
                     response = requests.get(next_page_url)
                     if response.status_code == 200:
-                        # Navigate to the next page
                         driver.get(next_page_url)
                         time.sleep(2)
-                        #page_source += driver.page_source
                     else:
                         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                         time.sleep(2)
-                        #page_source += driver.page_source
                         if driver.execute_script("return window.innerHeight + window.pageYOffset") >= driver.execute_script("return document.body.scrollHeight"):
                             print("Reached end of page")
                             break
