@@ -116,14 +116,14 @@ function checkVisibility() {
         get_full_links.classList.add('hidden');
         get_full_links_label.classList.add('hidden');
     }
-    if (selected_option.value != 'main') {
+    /* if (selected_option.value != 'main') {
         searched_keyword.classList.add('hidden');
         searched_keyword_label.classList.add('hidden');
         searched_keyword.value = "";
     } else {
         searched_keyword.classList.remove('hidden');
         searched_keyword_label.classList.remove('hidden');
-    }
+    } */
 }
 document.addEventListener('DOMContentLoaded', function () {
     var paginationCheckbox = document.getElementById('pagination_scrape');

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request
 from bs4 import BeautifulSoup
 import requests
 import re
@@ -38,7 +38,7 @@ def extract_main_content(soup):
     for tag in main_content:
         inline_content = tag.find_all(['p', 'span', 'td', 'th', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
         for element in inline_content:
-            #element.insert_before(' ')
+            element.insert_before(' ')
             element.insert_after(' ')
     return main_content
     
@@ -110,7 +110,6 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
         if pagination_count>0:
             pagination_texts = ['Next', 'next', 'Next Page', 'Next page', '>','›', 'Continue', 'Next >', 'Forward', 'More', 'Proceed', 'Next »', 'Ďalej', 'Ďalej>', 'Ďalšie', 'Ďalšie >', 'Ďalšia', 'Ďalšia strana', 'Ďalšia >', 'Ďalšia strana >', 'Pokračovať', 'Pokračovať >', 'Nasledujúca stránka']
             for i in range(1,pagination_count+1):
-                
                 page_source += driver.page_source
                 next_button = None
                 for text in pagination_texts:
@@ -207,13 +206,13 @@ def construct_next_page_url(base_url, page_number):
 
 def dismiss_popups(driver):
     try:
-        accept_button = driver.find_element(By.XPATH, '//button[contains(text(), "Accept") or contains(text(), "Accept All") or contains(text(), "Accept cookies") or contains(text(), "Accept & Continue") or contains(text(), "Continue") or contains(text(), "Povoliť") or contains(text(), "Povoliť všetko") or contains(text(), "Súhlasím") or contains(text(), "Súhlasím s používaním súborov cookies") or contains(text(), "Prijať všetky súbory cookies") or contains(text(), "Súhlasím so všetkými cookies") or contains(text(), "Potvrdiť")]')
+        accept_button = driver.find_element(By.XPATH, '//button[contains(text(), "Accept") or contains(text(), "Accept All") or contains(text(), "Accept cookies") or containts(text(), " OK, got it") or contains(text(), "Accept & Continue") or contains(text(), "Continue") or contains(text(), "Povoliť") or contains(text(), "Povoliť všetko") or contains(text(), "Súhlasím") or contains(text(), "Súhlasím s používaním súborov cookies") or contains(text(), "Prijať všetky súbory cookies") or contains(text(), "Súhlasím so všetkými cookies") or contains(text(), "Potvrdiť")]')
         driver.execute_script("arguments[0].scrollIntoView();", accept_button)
         accept_button.click()
         print("Popup dismissed successfully.")
     except NoSuchElementException:
         try:
-            accept_button = driver.find_element(By.XPATH, '//a[contains(text(), "Accept") or contains(text(), "Accept All") or contains(text(), "Accept cookies") or contains(text(), "Accept & Continue") or contains(text(), "Continue") or contains(text(), "Povoliť") or contains(text(), "Povoliť všetko") or contains(text(), "Súhlasím") or contains(text(), "Súhlasím s používaním súborov cookies") or contains(text(), "Prijať všetky súbory cookies") or contains(text(), "Súhlasím so všetkými cookies") or contains(text(), "Potvrdiť")]')
+            accept_button = driver.find_element(By.XPATH, '//a[contains(text(), "Accept") or contains(text(), "Accept All") or contains(text(), "Accept cookies") or containts(text(), " OK, got it") or contains(text(), "Accept & Continue") or contains(text(), "Continue") or contains(text(), "Povoliť") or contains(text(), "Povoliť všetko") or contains(text(), "Súhlasím") or contains(text(), "Súhlasím s používaním súborov cookies") or contains(text(), "Prijať všetky súbory cookies") or contains(text(), "Súhlasím so všetkými cookies") or contains(text(), "Potvrdiť")]')
             driver.execute_script("arguments[0].scrollIntoView();", accept_button)
             accept_button.click()
             print("Popup dismissed successfully.")
@@ -311,7 +310,7 @@ def index():
         
 
     plain_text=""
-    if head:
+    if head and content_type != "a":
         for element in head:
             if isinstance(element, str): 
                 text = element.strip()
@@ -320,7 +319,15 @@ def index():
             plain_text +=  text +' '
         plain_text = re.sub(r'\s*([,.?!;:])\s*', r'\1 ', plain_text)
         plain_text = re.sub(r'\s+', ' ', plain_text)
+    if head and content_type == "a":
+        for element in head:
+            if isinstance(element, str): 
+                text = element.strip()
+            else:
+                text = element.get_text().strip()
+            plain_text +=  text +'\n'
 
+    if head:
         if clean_stopwords:
             plain_text = remove_stopwords([plain_text], stopwords, language_choice)
         if get_lemmas:
