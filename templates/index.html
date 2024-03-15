@@ -32,8 +32,8 @@
                 <option value="p">Text in p tags</option>
                 <option value="div">Text in div tags</option>
                 <option value="span">Text in span tags</option>
-                <option value="ul">Text in ul tags</option>
-                <option value="ol">Text in ol tags</option>
+                <option value="th">Text in table head</option>
+                <option value="td">Text in table body</option>
                 <option value="li">Text in li tags</option>
                 <option value="h1">H1</option>
                 <option value="h2">H2</option>
@@ -100,10 +100,11 @@
                 <button type="submit" onclick="SaveToFile">Save to location</button>
             </form>
         </div>
-
-        <h2>Output:</h2>
-        <div class="output-text-container">
-            {{ head }}
+        <div class="outer-text-container">
+            <h2>Output:</h2>
+            <div class="output-text-container">
+                {{ head }}
+            </div>
         </div>
         {% endif %}
     </div>

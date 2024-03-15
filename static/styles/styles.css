@@ -103,16 +103,23 @@ input[type="checkbox"] {
 }
 
 .output-text-container {
-    width: 95%;
-    margin: auto;
     padding: 20px;
     border-radius: 8px;
     line-height: 1.5;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.outer-text-container {
+    width: 80%;
+    margin: auto;
 }
 
 .output-container h2 {
-    margin-left: 2em;
     color: var(--secondary-color);
+}
+
+.output-container {
+    width: 100%;
 }
 
 .output-form-container h2 {

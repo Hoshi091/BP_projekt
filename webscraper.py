@@ -3,6 +3,9 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
+import tkinter as tk
+from tkinter import filedialog
+
 
 import nltk
 from nltk.tokenize import sent_tokenize
@@ -59,13 +62,10 @@ def extract_links(soup, full_links, links):
             return soup.find_all("a")
 
         
-
 def extract_matching_sentences(soup, content_type, input_kw):
     text_elements = soup.find_all(content_type)
     if not text_elements:
         text_elements = soup.find_all('body')
-    #print(content_type)
-    #print(soup)
     text=""
     for element in text_elements:
         inline_content = element.find_all(['p', 'span', 'td', 'th', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
@@ -118,15 +118,12 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
                         break 
                     except NoSuchElementException:
                         pass
-
                 """if not next_button:  # If no button found, try finding it as a link element
                     try:
                         next_button = driver.find_element(By.CSS_SELECTOR, 'link[rel="next"]')
                     except NoSuchElementException:
                         next_button = None
-                        pass"""
-                
-                        
+                        pass"""       
                 if next_button:
                     print("Next button found")
                     previous_url = driver.current_url
@@ -218,8 +215,8 @@ def dismiss_popups(driver):
             print("Popup dismissed successfully.")
         except NoSuchElementException:
             print("Accept button not found.")
-    except Exception as e:
-        print("Error occurred while dismissing popup:", e)
+    except Exception:
+        print("Error occurred while dismissing popup:", Exception)
     except:
         pass
 
@@ -237,7 +234,6 @@ def remove_stopwords(main_text, stop_words, language_choice):
         picked_stopwords = stop_words.words('english')
     
     print(picked_stopwords)
-    #print (main_text)
     filtered_texts=  [' '.join([word for word in string.split() if word.lower() not in picked_stopwords]) for string in main_text] 
     return ' '.join(filtered_texts)
 
@@ -262,17 +258,26 @@ def save_to_file(data, file_name):
     final_data = final_data.lstrip('[').rstrip(']')
     final_data = final_data.strip()
 
-    output_path = os.path.join(os.getcwd(), "output")
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-    
-    file_path = os.path.join(output_path, f"{file_name}.txt")
-    try:
-        with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(final_data)
-        return True
-    except Exception as e:
+    root = tk.Tk()
+    root.withdraw() 
+
+    destination_folder = filedialog.askdirectory(title="Select Destination Folder")
+
+    if destination_folder:
+        if not os.path.exists(destination_folder):
+            os.makedirs(destination_folder)
+
+        file_path = os.path.join(destination_folder, f"{file_name}.txt")
+        try:
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(final_data)
+            return True
+        except Exception:
+            return False
+    else:
+        print("No destination folder selected.")
         return False
+
     
 
 
