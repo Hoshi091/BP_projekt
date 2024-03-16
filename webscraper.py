@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
-import tkinter as tk
+import tkinter
 from tkinter import filedialog
 
 
@@ -258,7 +258,7 @@ def save_to_file(data, file_name):
     final_data = final_data.lstrip('[').rstrip(']')
     final_data = final_data.strip()
 
-    root = tk.Tk()
+    root = tkinter.Tk()
     root.withdraw() 
 
     destination_folder = filedialog.askdirectory(title="Select Destination Folder")
