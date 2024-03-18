@@ -153,11 +153,11 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
     else:
         page_source += driver.page_source
     
-
-    page_source = re.sub(r'<br\s*/?>|\n', ' ', page_source)
-    page_source = re.sub(r'\.(?![\"”\)\]])', '. ', page_source) 
-    page_source = re.sub(r'\?(?![\"”\)\]])', '? ', page_source) 
-    page_source = re.sub(r'\!(?![\"”\)\]])', '! ', page_source) 
+    if content_type != "a":
+        page_source = re.sub(r'<br\s*/?>|\n', ' ', page_source)
+        page_source = re.sub(r'\.(?![\"”\)\]])', '. ', page_source) 
+        page_source = re.sub(r'\?(?![\"”\)\]])', '? ', page_source) 
+        page_source = re.sub(r'\!(?![\"”\)\]])', '! ', page_source) 
     driver.quit()
     soup = BeautifulSoup(page_source, 'html.parser')
     result=None
@@ -356,14 +356,16 @@ def save():
             message = "Úspešne uložené"
         else:
             message = "Nepodarilo sa uložiť"
+        btn_message = "Opätovné dolovanie"
     else:
         if saved:
             message = "Saved successfully"
         else:
             message = "Failed to save"
+        btn_message = "Scrape again"
 
 
-    return render_template('save.html', message=message, saved=saved)
+    return render_template('save.html', message=message, saved=saved, btn_message = btn_message)
 
 if __name__ == '__main__':
     app.run(debug=True)

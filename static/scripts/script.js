@@ -24,7 +24,7 @@ var labelTexts = {
         'get_dynamic_content_label': 'Stránka je dynamická',
         'pagination_scrape_label': 'Stránkovanie',
         'pagination_count_label': 'Zadajte počet stránok na zbieranie',
-        'clean_stopwords_label': 'Vyčistiť stopwords',
+        'clean_stopwords_label': 'Vyčistiť stop slová',
         'get_lemmas_label': 'Lematizácia',
         'delete_numbers_label': 'Vymazať čísla',
         'save_text': 'Uložiť do súboru:',
