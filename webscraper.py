@@ -62,19 +62,23 @@ def extract_links(soup, full_links, links):
             return soup.find_all("a")
 
         
-def extract_matching_sentences(soup, content_type, input_kw):
-    text_elements = soup.find_all(content_type)
-    if not text_elements:
-        text_elements = soup.find_all('body')
-    text=""
-    for element in text_elements:
-        inline_content = element.find_all(['p', 'span', 'td', 'th', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
-        for el in inline_content:
-            el.insert_after('. ')
-        el_text = element.get_text()
-        if not el_text.endswith('.'):
-            el_text += '. ' 
-        text += el_text + " "
+def extract_matching_sentences(soup, content_type, input_kw, get_links, get_full_links):
+    if content_type == "a" and get_links:
+        links = extract_links(soup, get_full_links, get_links)
+        text = '. '.join(map(str, links))
+    else:
+        text_elements = soup.find_all(content_type)
+        if not text_elements:
+            text_elements = soup.find_all('body')
+        text=""
+        for element in text_elements:
+            inline_content = element.find_all(['p', 'span', 'td', 'th', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+            for el in inline_content:
+                el.insert_after('. ')
+            el_text = element.get_text()
+            if not el_text.endswith('.'):
+                el_text += '. ' 
+            text += el_text + " "
     text = re.sub(r'(?<!\.)\n', '. ', text)
     sentences = sent_tokenize(text)
     pattern=[]
@@ -162,19 +166,20 @@ def extract_dynamic_content(url, content_type, input_keyword, get_full_links,get
     soup = BeautifulSoup(page_source, 'html.parser')
     result=None
 
-    if content_type != "main":
-        if content_type == "a":
-            result = extract_links(soup, get_full_links, get_links)
-            return result
-        else:
-            result = soup.find_all(content_type)
-            return result
-    elif input_keyword !="":
-            result = extract_matching_sentences(soup, content_type, input_keyword)
-            return result
-    else:
+    if input_keyword != "":
+        result = extract_matching_sentences(soup, content_type, input_keyword, get_links, get_full_links)
+        return result
+    elif content_type == "main":
         result = extract_main_content(soup)
-        return soup
+        return result
+    elif content_type == "a" and input_keyword =="":
+        result = extract_links(soup, get_full_links, get_links)
+        return result
+    else:
+        result = soup.find_all(content_type)
+        return result
+    
+   
     
 def construct_next_page_url(base_url, page_number):
     query_param_url = f"{base_url}?page={page_number}"
@@ -304,10 +309,10 @@ def index():
         if dynamic_content:
             head = extract_dynamic_content(url, content_type, input_keyword, get_full_links,get_links)
         elif input_keyword !="":
-            head = extract_matching_sentences(soup, content_type, input_keyword)
+            head = extract_matching_sentences(soup, content_type, input_keyword, get_links, get_full_links)
         elif content_type == "main":
             head = extract_main_content(soup)
-        elif content_type == "a":
+        elif content_type == "a" and input_keyword =="":
             head = extract_links(soup,get_full_links,get_links)
         else:
             head = soup.find_all(content_type)
