@@ -269,9 +269,6 @@ def save_to_file(data, file_name):
     destination_folder = filedialog.askdirectory(title="Select Destination Folder")
 
     if destination_folder:
-        if not os.path.exists(destination_folder):
-            os.makedirs(destination_folder)
-
         file_path = os.path.join(destination_folder, f"{file_name}.txt")
         try:
             with open(file_path, 'w', encoding='utf-8') as f:
