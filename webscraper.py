@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, redirect, render_template, request, url_for
 from bs4 import BeautifulSoup
 import requests
 import re
@@ -348,26 +348,37 @@ def index():
 
 @app.route('/save', methods=['GET', 'POST'])
 def save():
-    data = request.form['data']
-    file_name = request.form['file_name']
-    language = request.form['language']
-    saved = save_to_file(data, file_name) 
+    try:
+        data = request.form['data']
+        file_name = request.form['file_name']
+        language = request.form['language']
+        if all([data,file_name,language]):
+            saved = save_to_file(data, file_name) 
 
-    if language == 'sk':
-        if saved:
-            message = "Úspešne uložené"
+            if language == 'sk':
+                if saved:
+                    message = "Úspešne uložené"
+                else:
+                    message = "Nepodarilo sa uložiť"
+                btn_message = "Opätovné dolovanie"
+            else:
+                if saved:
+                    message = "Saved successfully"
+                else:
+                    message = "Failed to save"
+                btn_message = "Scrape again"
+            return render_template('save.html', message=message, saved=saved, btn_message = btn_message)
         else:
-            message = "Nepodarilo sa uložiť"
-        btn_message = "Opätovné dolovanie"
-    else:
-        if saved:
-            message = "Saved successfully"
-        else:
-            message = "Failed to save"
-        btn_message = "Scrape again"
+            return redirect(url_for('index'))
+    except KeyError:
+        return redirect(url_for('index'))
 
 
-    return render_template('save.html', message=message, saved=saved, btn_message = btn_message)
+    
+
+@app.route('/<path:invalid_path>')
+def invalid_route(invalid_path):
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)
