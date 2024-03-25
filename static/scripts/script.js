@@ -13,7 +13,8 @@ var labelTexts = {
         'get_lemmas_label': 'Get lemmas',
         'delete_numbers_label': 'Delete numbers',
         'save_text': 'Save to file:',
-        'file_name_label': 'File name:'
+        'file_name_label': 'File name:',
+        'output_label': 'Output:'
     },
     'sk': {
         'language_picker_label': 'Vyberte si jazyk aplikácie a webovej stránky:',
@@ -28,7 +29,8 @@ var labelTexts = {
         'get_lemmas_label': 'Lematizácia',
         'delete_numbers_label': 'Vymazať čísla',
         'save_text': 'Uložiť do súboru:',
-        'file_name_label': 'Názov súboru:'
+        'file_name_label': 'Názov súboru:',
+        'output_label': 'Výstup:'
     }
 }
 var optionTexts = {
