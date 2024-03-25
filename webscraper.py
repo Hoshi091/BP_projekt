@@ -290,7 +290,7 @@ def index():
 
     if request.method == 'POST':
         url = request.form['url']
-        source = requests.get(url).text
+            
         content_type = request.form['content_type']
         input_keyword = request.form['keyword_input']
         get_links = request.form.get('get_links', default=False, type=bool)
@@ -300,6 +300,13 @@ def index():
         clean_stopwords = request.form.get('clean_stopwords', default=False, type=bool)
         get_lemmas = request.form.get('get_lemmas', default=False, type=bool)
         clean_numbers = request.form.get('delete_numbers', default=False, type=bool) 
+        try:
+            source = requests.get(url).text
+        except Exception:
+            if language_choice == "en":
+                return render_template('index.html',head="Sorry! Something went wrong", language=language_choice)
+            else:
+               return render_template('index.html',head="Prepáčte! Niečo sa pokazilo", language=language_choice) 
 
 
         soup = BeautifulSoup(source, 'lxml')
@@ -313,8 +320,6 @@ def index():
             head = extract_links(soup,get_full_links,get_links)
         else:
             head = soup.find_all(content_type)
-
-        
 
     plain_text=""
     if head and content_type != "a":
